@@ -1,0 +1,13 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.idea/
+data/incidents/*
+!data/incidents/.gitkeep
+data/models/*
+!data/models/.gitkeep
+data/videos/*
+!data/videos/.gitkeep
+*.db
+*.sqlite3

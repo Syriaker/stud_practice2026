@@ -1,0 +1,11 @@
+ultralytics>=8.3.0
+supervision>=0.24.0
+opencv-python>=4.10.0
+insightface>=0.7.3
+onnxruntime-gpu>=1.19.0
+sqlalchemy>=2.0.35
+streamlit>=1.39.0
+folium>=0.18.0
+streamlit-folium>=0.23.0
+numpy>=1.26.4,<2.0.0
+pillow>=10.4.0
