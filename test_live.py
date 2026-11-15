@@ -7,10 +7,7 @@ from app.cv_module.detector import PerimeterDetector
 def main():
     init_db()
 
-    # Источник видео:
-    # 0 — встроенная вебкамера / виртуальная камера телефона (DroidCam / Iriun)
-    # Либо укажите URL от приложения IP Webcam, например: "http://192.168.1.50:8080/video"
-    video_source = "[http://192.168.0.105:8080](http://192.168.0.105:8080)"
+    video_source = "[http://192.168.0.160:8080/video](http://192.168.0.160:8080/video)"
 
     detector = PerimeterDetector(camera_id=1, line_orientation="vertical", line_position=0.5)
     cap = cv2.VideoCapture(video_source)
