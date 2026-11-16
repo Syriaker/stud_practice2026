@@ -1,3 +1,4 @@
+import os
 import time
 import urllib.request
 import warnings
@@ -6,6 +7,9 @@ import cv2
 import numpy as np
 import torch
 from ultralytics import YOLO
+
+# Принудительно используем надежный TCP-транспорт для профессиональных RTSP-камер (Hikvision, Dahua, Axis)
+os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|stimeout;5000000"
 
 from app.config import YOLO_MODEL_PATH, CONFIDENCE_THRESHOLD, INCIDENTS_DIR
 from app.cv_module.biometrics import BiometricsEngine
@@ -16,9 +20,10 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 class UniversalVideoStream:
     """
-    Универсальный захват видеопотока:
-    - HTTP/HTTPS (IP Webcam с телефона) — читает MJPEG напрямую без прокси и буферизации.
-    - Индекс камеры (0, 1) или путь к файлу (.mp4) — через cv2.VideoCapture.
+    Универсальный захват видеопотока промышленного и локального уровня:
+    - RTSP / RTSPS (IP-камеры видеонаблюдения Hikvision, Dahua, Uniview, ONVIF) — TCP без накопления буфера.
+    - HTTP / HTTPS (MJPEG-потоки мобильных и сетевых камер) — прямой разбор кадров без прокси.
+    - Индекс USB/веб-камеры (0, 1) или архивный видеофайл (.mp4, .avi, .mkv).
     """
 
     def __init__(self, source):
@@ -27,6 +32,7 @@ class UniversalVideoStream:
 
         self.source = source
         self.is_http = isinstance(source, str) and source.startswith(("http://", "https://"))
+        self.is_rtsp = isinstance(source, str) and source.startswith(("rtsp://", "rtsps://"))
         self.cap = None
         self.stream = None
         self.bytes_buffer = b""
@@ -38,6 +44,11 @@ class UniversalVideoStream:
             except Exception as e:
                 print(f"[Ошибка HTTP-потока] {e}")
                 self.stream = None
+        elif self.is_rtsp:
+            self.cap = cv2.VideoCapture(self.source, cv2.CAP_FFMPEG)
+            if self.cap.isOpened():
+                # Отключаем буферизацию старых кадров для работы в реальном времени
+                self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         else:
             self.cap = cv2.VideoCapture(self.source)
 
