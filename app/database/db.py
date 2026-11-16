@@ -125,7 +125,53 @@ def get_recent_incidents(limit: int = 50):
             .limit(limit)
             .all()
         )
+def delete_employee(employee_id: int):
+    """Удаляет сотрудника из БД."""
+    with SessionLocal() as session:
+        emp = session.query(Employee).filter(Employee.id == employee_id).first()
+        if emp:
+            session.delete(emp)
+            session.commit()
 
+
+def clear_all_incidents():
+    """Очищает журнал инцидентов в БД (удобно перед демонстрацией на защите)."""
+    with SessionLocal() as session:
+        session.query(Incident).delete()
+        session.commit()
+
+
+def update_camera_settings(camera_id: int, video_source: str):
+    """Обновляет адрес видеопотока для выбранной камеры."""
+    with SessionLocal() as session:
+        cam = session.query(Camera).filter(Camera.id == camera_id).first()
+        if cam:
+            cam.video_source = video_source
+            session.commit()
+def add_camera(name: str, sector_description: str, latitude: float, longitude: float, video_source: str, login: str = "", password: str = ""):
+    """Добавляет новую камеру в систему."""
+    with SessionLocal() as session:
+        cam = Camera(
+            name=name,
+            sector_description=sector_description,
+            latitude=latitude,
+            longitude=longitude,
+            video_source=video_source,
+            stream_login=login,
+            stream_password=password,
+        )
+        session.add(cam)
+        session.commit()
+        session.refresh(cam)
+        return cam
+
+def delete_camera(camera_id: int):
+    """Удаляет камеру из системы."""
+    with SessionLocal() as session:
+        cam = session.query(Camera).filter(Camera.id == camera_id).first()
+        if cam:
+            session.delete(cam)
+            session.commit()
 
 if __name__ == "__main__":
     init_db()
